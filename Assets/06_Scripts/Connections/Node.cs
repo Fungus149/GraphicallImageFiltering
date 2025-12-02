@@ -6,61 +6,60 @@ using UnityEngine;
 
 public class Node : MonoBehaviour,Memory.IClickable {
     //[SerializeField] bool input;
-    public float width = 10f;
-    public bool lined = false;
+    //public float[] input;
+    //public float[] output;
+    //public float width = 10f;
+    //public int index = 0;
+    //public bool lined = false;
 
-    [SerializeField] GameObject highlight;
-    [SerializeField] bool input;
+    //[SerializeField] bool isInput;
 
-    GameObject first_node;
-    GameObject lr;
-    Memory memory;
-    Connection lr_con;
-    SpriteRenderer sr;
-    private void Start()
-    {
-        sr = GetComponent<SpriteRenderer>();
-        memory = Camera.main.GetComponent<Memory>();
-    }
-    private void OnMouseDown() {
-        first_node = memory.selected;
-        //Debug.Log("click" + first_node != null);
-        //if (first_node == gameObject) memory.selected = null;
-        if (input){
-            if (first_node != null && first_node.GetComponent<Node>() != null && !lined){
-                Debug.Log("Lining");
-                lined = true;
-                lr = new GameObject("Line");
-                lr_con = lr.AddComponent<Connection>();
-                lr_con.second_node = gameObject;
-                lr_con.first_node = first_node;
-                GetComponentInParent<Block>().source = first_node.GetComponentInParent<Block>();
-                first_node.GetComponentInParent<Block>().destination = GetComponentInParent<Block>();
-                GetComponentInParent<Block>().Refresh();
-            }
-        } // if (input)
+    //GameObject firstNode;
+    //GameObject lr;
+    //Memory memory;
+    //Connection lrConnection;
+    //SpriteRenderer sr;
+    //private void Start()
+    //{
+    //    sr = GetComponent<SpriteRenderer>();
+    //    memory = Camera.main.GetComponent<Memory>();
+    //}
+    //private void OnMouseDown() {
+    //    firstNode = memory.selected;
+    //    //Debug.Log("click" + first_node != null);
+    //    //if (first_node == gameObject) memory.selected = null;
+    //    if (isInput) {
+    //        if (firstNode != null && !firstNode.GetComponent<Node>().isInput && !lined)
+    //        {
+    //            Debug.Log("Lining");
+    //            lined = true;
+    //            lr = new GameObject("Line");
+    //            lrConnection = lr.AddComponent<Connection>();
+    //            lrConnection.second_node = gameObject;
+    //            lrConnection.first_node = firstNode;
+    //            GetComponentInParent<Block>().source[index] = firstNode.GetComponentInParent<Block>();
+    //            firstNode.GetComponentInParent<Block>().destination[index] = GetComponentInParent<Block>();
+    //            GetComponentInParent<Block>().Refresh();
+    //        }
+    //    } // if (input)
 
-        if (first_node == gameObject){
-            Unclick();
-            memory.selected = null;
-            return;
-        }
-        if (first_node != null) first_node.GetComponent<Memory.IClickable>().Unclick();
-        memory.selected = gameObject;
-        sr.color = UnityEngine.Color.magenta;
-        //else {
+    //    if (firstNode == gameObject) {
+    //        Unclick();
+    //        memory.selected = null;
+    //        return;
+    //    }
+    //    if (firstNode != null) firstNode.GetComponent<Memory.IClickable>().Unclick();
+    //    memory.selected = gameObject;
+    //    if (isInput) sr.color = new Color32(200, 255, 255, 255);
+    //    else sr.color = new Color32(255, 255, 200, 255);
+    //}
 
-        //    //GameObject highlight = new GameObject("highlight");
-        //    //SpriteRenderer sr = highlight.AddComponent<SpriteRenderer>();
-        //    //sr.sprite = Sprite.Create(Texture2D.whiteTexture, new ;
-        //    //sr.color = Color.cyan;
-        //    //highlight.transform.localPosition = Vector3.forward;
-        //    //highlight.transform.localScale += Vector3.one;
-        //}
-    }
+    //public void Unclick() {
+    //    if (isInput) sr.color = UnityEngine.Color.cyan;
+    //    else sr.color = UnityEngine.Color.yellow;
+    //}
 
-    public void Unclick(){
-        if (input) sr.color = UnityEngine.Color.cyan;
-        else sr.color = UnityEngine.Color.yellow;
-    }
+    //public Node connected = null;
+    //public int index = 0;
+    //public bool isLined = false;
 }

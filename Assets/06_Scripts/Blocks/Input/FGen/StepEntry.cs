@@ -8,7 +8,7 @@ public class StepEnntry : MonoBehaviour {
         fg = GetComponentInParent<Fgen>();
     }
     public void GrabValueFromEntry(string entry) {
-        fg.ts = double.Parse(entry);
+        fg.samples = int.Parse(entry);
         fg.Refresh();
     }
 }

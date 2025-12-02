@@ -1,17 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Unity.Collections.AllocatorManager;
 
-public class EntryKeyUnlock : MonoBehaviour
-{
+public class EntryKeyUnlock : MonoBehaviour {
     Memory memory;
-
-    private void Start()
-    {
+    Block block;
+    private void Start() {
         memory = Camera.main.GetComponent<Memory>();
+        block = GetComponentInParent<Block>();
     }
-    public void UnlockKeys()
-    {
-        memory.key_lock = false;
+    public void LockKeys() {
+        memory.isKeyLocked = false;
+        block.isMoveLocked = false;
     }
 }

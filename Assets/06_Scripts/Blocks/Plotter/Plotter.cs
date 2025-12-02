@@ -1,13 +1,16 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 public class Plotter : Block, Memory.IClickable {
-    public bool connect = false;
+    public bool isConnected = false;
 
-    [SerializeField] GameObject dot;
+    [SerializeField] GameObject[] dot;
+
     GameObject[] dots = new GameObject[0];
 
     Camera camuwu;
@@ -16,7 +19,11 @@ public class Plotter : Block, Memory.IClickable {
     Vector2 offset;
     Vector2 current;
     Memory memory;
-    bool redi=false;
+    float[,,] input;
+
+    int entries;
+    int layers;
+    int row;
 
     public void Start() {
         camuwu = Camera.main;
@@ -28,6 +35,7 @@ public class Plotter : Block, Memory.IClickable {
         current = camuwu.ScreenToWorldPoint(Input.mousePosition);
         offset = new Vector2(transform.position.x - current.x, transform.position.y - current.y);
 
+        // highlight handler:
         if (memory.selected == gameObject) {
             Unclick();
             memory.selected = null;
@@ -40,56 +48,74 @@ public class Plotter : Block, Memory.IClickable {
     }
 
     public void OnMouseDrag() {
-        current = camuwu.ScreenToWorldPoint(Input.mousePosition);
-        transform.position = new Vector3(current.x + offset.x, current.y + offset.y, -1);
+        if (!isMoveLocked) {
+            current = camuwu.ScreenToWorldPoint(Input.mousePosition);
+            transform.position = new Vector3(current.x + offset.x, current.y + offset.y, -5);
+        }
     }
-
+    public void OnMouseUp() {
+        transform.position = new Vector3(transform.position.x, transform.position.y, -1);
+    }
     public override void Refresh() {
-        redi = false;
-        Debug.Log("Refresh");
-        if(source != null) {
-            if (lr != null) Destroy(gameObject.GetComponent<LineRenderer>());
-            Vector2 center=transform.position;
-            input = source.output;
-            //foreach (double y in input) Debug.Log(y);
-            foreach (GameObject dotto in dots) { Destroy(dotto); }
-            dots = new GameObject[input.GetLength(0)];
-            float maxx = 10;
-            float maxy = 10;
-            for (int i = 0; i < dots.Length; i++) {
-                float x = (float)input[i, 0, 0];
-                float y = (float)input[i, 1, 0];
-                if (x > maxx) maxx = x;
-                if (-x > maxx) maxx = -x;
+        foreach (GameObject dotto in dots) { Destroy(dotto); }
+        if (lr != null) Destroy(gameObject.GetComponent<LineRenderer>());
+        if (nodesIn[0].isLined && nodesIn[0].connected.data != null) { //needed when the source block has no output given yet
+            input = nodesIn[0].connected.data;
+            Vector2 center = transform.position;
+            entries = input.GetLength(0);
+            layers = input.GetLength(2);
+            dots = new GameObject[entries * layers];
+            float maxy = 100f;
+            if (layers > 4) { Error(); return; }
+            for (int i = 0; i < entries; i++) {
+                for (int j = 0; j < layers; j++) { // when you send different discrete sequences for rgba.
+                float y = input[i, 0, j];
                 if (y > maxy) maxy = y;
                 if (-y > maxy) maxy = -y;
+                }
             }
-            for (int i = 0; i < dots.Length; i++) {
-                dots[i] = Instantiate(dot, transform);
-                dots[i].transform.position = new Vector3(center.x + 120 / maxx * (float)input[i, 0, 0], center.y + 135 / maxy * (float)input[i, 1, 0], -2);
+            for (int i = 0; i < layers; i++) {
+                row = entries * i;
+                Debug.Log(row);
+                Debug.Log(dot[i].name);
+                for (int j = 0; j < entries; j++) {
+                    dots[row+j] = Instantiate(dot[i], transform);
+                    if (float.IsInfinity(input[j, 0, i]) || float.IsNaN(input[j, 0, i])) dots[row + j].transform.position = new Vector3(center.x + 120 / dots.Length * j, 165, -2); // instantinate an asympthote
+                    else dots[row + j].transform.position = new Vector3(center.x - 170 + j * 20, center.y + input[j, 0, i] * 20, -2);
+                }
             }
-            if (connect) {
+            Trim();
+            if (isConnected) {
                 lr = gameObject.AddComponent<LineRenderer>();
-                Debug.Log("Line:" + lr);
                 lr.material = new Material(Shader.Find("Sprites/Default"));
                 lr.widthMultiplier = 4f;
                 lr.endColor = Color.red;
                 lr.startColor = Color.red;
                 lr.positionCount = dots.Length;
-                Debug.Log(dots.Length);
-                redi = true;
             }
         } // if(source != null)
     } // Refresh
     private void Update() {
-        if(connect & redi) {
+        if (isConnected) {
             for (int i = 0; i < dots.Length; i++) {
-                //Debug.Log(i); Debug.Log(dots[i].transform.position);
                 lr.SetPosition(i, dots[i].transform.position);
             }
         }
     }
     public void Unclick() {
         sr.color = Color.white;
+    }
+
+    void Trim() { // trim plot to the graph borders
+        Vector2 center = transform.position;
+        float y;
+        float x;
+        foreach (GameObject dotto in dots) {
+            //Debug.Log(dotto.name);
+            x = dotto.transform.position.x;
+            y = dotto.transform.position.y;
+            if (/*y < center.y - 150 ||*/ y > center.y + 150 || x > center.x + 170 || x < center.x - 170) dotto.SetActive(false);
+            else dotto.SetActive(true);
+        }
     }
 } // class

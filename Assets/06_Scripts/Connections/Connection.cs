@@ -4,10 +4,8 @@ using UnityEngine;
 using UnityEngine.Windows;
 
 public class Connection : MonoBehaviour, Memory.IClickable {
-    public GameObject first_node;
-    public GameObject second_node;
-
-    //[SerializeField] GameObject highlight;
+    public NodeOut firstNode;
+    public NodeIn secondNode;
 
     LineRenderer lr;
     MeshCollider collider;
@@ -24,16 +22,15 @@ public class Connection : MonoBehaviour, Memory.IClickable {
         memory = Camera.main.GetComponent<Memory>();
     }
     void Update() {
-        if (first_node == null || second_node == null) { Destroy(); return; } //Delete self if source has been deleted
-        lr.SetPosition(0, second_node.transform.position);
-        lr.SetPosition(1, first_node.transform.position);
+        if (firstNode == null || secondNode == null) { Destroy(); return; } //Delete self if source has been deleted
+        lr.SetPosition(0, secondNode.transform.position);
+        lr.SetPosition(1, firstNode.transform.position);
         lr.BakeMesh(mesh);
         collider.sharedMesh = mesh;
     }
 
     private void OnMouseDown() {
-        if (memory.selected == gameObject)
-        {
+        if (memory.selected == gameObject) {
             Unclick();
             memory.selected = null;
             return;
@@ -45,18 +42,20 @@ public class Connection : MonoBehaviour, Memory.IClickable {
 
     }
 
-    public void Unclick()
-    {
+    public void Unclick() {
         lr.endColor = Color.yellow;
         lr.startColor = Color.cyan;
     }
 
     public void Destroy() {
-        if (first_node != null) { first_node.GetComponentInParent<Block>().destination = null; } //check for when you removed parent object
-        if (second_node != null) {
-            second_node.GetComponentInParent<Block>().source = null;
-            second_node.GetComponentInParent<Block>().Refresh();
-            second_node.GetComponent<Node>().lined = false;
+        if (firstNode != null) {
+            firstNode.connected = null;
+            firstNode.isLined = false;
+        } //check for when you removed parent object
+        if (secondNode != null) {
+            secondNode.connected = null;
+            secondNode.isLined = false;
+            secondNode.GetComponentInParent<Block>().Refresh();
         }
         Destroy(gameObject);
     }
