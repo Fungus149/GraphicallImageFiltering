@@ -1,16 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
 //using UnityEngine.Windows;
 
 public class ReadImage : Block, Memory.IClickable {
-    public bool isConnected = false;
-
-    [SerializeField] Sprite sprite;
+    public string path = @"C:\Users\gg149\Downloads\cw.png";
 
     Camera camuwu;
     SpriteRenderer sr;
+    Texture2D tex;
     Vector2 offset;
     Vector2 current;
     Memory memory;
@@ -51,9 +51,26 @@ public class ReadImage : Block, Memory.IClickable {
         transform.position = new Vector3(transform.position.x, transform.position.y, -1);
     }
     public override void Refresh() {
-        pixels = sprite.texture.GetPixels32();
-        textureWidth = sprite.texture.width;
-        textureHeight = sprite.texture.height;
+        switch (Path.GetExtension(path)) {
+            case ".png":
+            case ".jpg":
+            case ".jpeg":
+                if (File.Exists(path)) {
+                    tex = new Texture2D(2, 2);
+                    tex.LoadImage(File.ReadAllBytes(path)); // it rescales automatically
+                }
+                else {
+                    Error("Incorrect path");
+                    return;
+                }
+                break;
+            default:
+                Error("Unsupportes file type");
+                return;
+        }
+        pixels = tex.GetPixels32();
+        textureWidth = tex.width;
+        textureHeight = tex.height;
         output = new float[textureWidth, textureHeight, 4];
         for (int i = 0; i < textureWidth; i++) {
             for (int j = textureHeight - 1; j >= 0; j--) {

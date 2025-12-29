@@ -5,8 +5,9 @@ using UnityEngine.Windows;
 
 public class NodeOut : MonoBehaviour, Memory.IClickable {
     public float[,,] data;
+
     public NodeIn connected = null;
-    public int index = 0;
+    public byte[] type = new byte[] { 1, 1, 1};
     public bool isLined = false;
 
     GameObject selected;

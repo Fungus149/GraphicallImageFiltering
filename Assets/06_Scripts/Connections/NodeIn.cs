@@ -6,7 +6,6 @@ using UnityEngine.Windows;
 
 public class NodeIn : MonoBehaviour, Memory.IClickable {
     public NodeOut connected = null;
-    public int index = 0;
     public bool isLined = false;
 
     GameObject selected;

@@ -96,7 +96,7 @@ public class Fgen : Block, Memory.IClickable {
         }
         for (int i = 0; i < output.GetLength(0); i++) {
             for (int j = 0; j < coeff.Length; j++)
-                output[i, 0, 0] += coeff[j] * Mathf.Pow(x[i], j);
+                output[i, 0, 0] += Mathf.Round(coeff[j] * Mathf.Pow(x[i], j) * 1000)/1000;
             //Debug.Log($"y[{i}] = {output[i, 0, 0]}");
         }
         nodesOut[0].data = output;
