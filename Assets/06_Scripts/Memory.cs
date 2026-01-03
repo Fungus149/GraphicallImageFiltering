@@ -4,32 +4,31 @@ using UnityEngine;
 
 public class Memory : MonoBehaviour {
     /*
-     TODO
-     Multiple otputs from input!!!!
+    TODO
+    matrix block
 
-     put blocks to propper size
-     some error handling
-     error messages
-     blocks snapping
+    saving control diagrams
+         
+    clamp block
+    xyz block
+    convolution block
+    deconvolution block
+    region growing block
+    join block
+    cumsum block
+    select subimage block
+    
+    saving graphs
 
-     saving control diagrams
-     saving graphs
-
-     clamp block
-     xyz block
-     select subimage block
-     convolution block
-     deconvolution block
-     region growing block
-     join block
-     
-     make graph usable
-     display values on graphs and images
-     display data on node click
-     */
+    Error when changing from asympthote only graph to dots only graph
+    */
 
     public GameObject selected;
+    public GameObject dataDescriptor;
     public GameObject pointDescriptor;
+    public GameObject imageDisplay;
+    public GameObject sequenceDisplay;
+    public GameObject controlSystem;
     public bool isKeyLocked = false;
     public interface IClickable {
         void Unclick() { }
@@ -40,6 +39,4 @@ public class Memory : MonoBehaviour {
             if (selected.GetComponent<Connection>() != null) selected.GetComponent<Connection>().Destroy(); ;
         }
     }
-
-    
 }

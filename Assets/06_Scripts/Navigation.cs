@@ -13,6 +13,7 @@ public class Navigation : MonoBehaviour{
     Vector2 current;
     Vector2 last;
     float cam_size;
+    float scroll;
     bool click = true;
     private void Start() {
          cam_size = GetComponent<Camera>().orthographicSize;
@@ -21,13 +22,20 @@ public class Navigation : MonoBehaviour{
         if (Input.GetMouseButton(2)) {
             if (click) { last = Input.mousePosition; click = false; }
             current = Input.mousePosition;
-            bg.transform.position += new Vector3(cam_size * 0.001f * velocity * (current.x - last.x), cam_size * 0.001f * velocity * (current.y - last.y), 0);
+            transform.position += new Vector3(-cam_size * 0.001f * velocity * (current.x - last.x), -cam_size * 0.001f * velocity * (current.y - last.y), 0);
             last = current;
         }
         else click = true;
         if (!isScrollLocked) {
-            cam_size -= Input.mouseScrollDelta.y * 50;
-            if (cam_size < 50) { cam_size = 50; }
+            scroll = Input.mouseScrollDelta.y * 50;
+            if (Input.GetKey(KeyCode.LeftShift)) scroll /= 10;
+            cam_size -= scroll;
+            if (cam_size < 50) { 
+                cam_size = 50; 
+            }
+            if (cam_size > 500) { 
+                cam_size = 500; 
+            }
             GetComponent<Camera>().orthographicSize = cam_size;
         }
     }

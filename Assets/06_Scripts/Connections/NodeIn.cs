@@ -18,8 +18,6 @@ public class NodeIn : MonoBehaviour, Memory.IClickable {
         sr = GetComponent<SpriteRenderer>();
         memory = Camera.main.GetComponent<Memory>();
     }
-
-    // Update is called once per frame
     private void OnMouseDown() {
         selected = memory.selected;
         if (!isLined && selected != null && selected.GetComponent<NodeOut>()!=null) {
@@ -32,11 +30,8 @@ public class NodeIn : MonoBehaviour, Memory.IClickable {
             lrConnection.firstNode = selected.GetComponent<NodeOut>();
             connected = selected.GetComponent<NodeOut>();
             selected.GetComponent<NodeOut>().connected = this;
-            //GetComponentInParent<Block>().source[index] = selected.GetComponentInParent<Block>();
-            //selected.GetComponentInParent<Block>().destination[index] = GetComponentInParent<Block>();
             GetComponentInParent<Block>().Refresh();
         }
-
         if (selected == gameObject) {
             Unclick();
             memory.selected = null;

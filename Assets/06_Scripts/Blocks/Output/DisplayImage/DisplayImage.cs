@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using static UnityEditor.Rendering.CameraUI;
 
 public class DisplayImage : Block, Memory.IClickable {
@@ -12,96 +13,76 @@ public class DisplayImage : Block, Memory.IClickable {
     [SerializeField] Sprite sprite;
 
     Color[] cols;
-    Camera camuwu;
-    SpriteRenderer sr;
-    Texture2D newTexture;
-    Vector2 offset;
-    Vector2 current;
-    Memory memory;
-
     float[,,] input;
     byte[] inputType;
 
-    // Start is called before the first frame update
-    public void Start() {
+    Texture2D newTexture;
+    int textureWidth, textureHeight;
+    public virtual void Start() {
         sr = GetComponent<SpriteRenderer>();
         camuwu = Camera.main;
         memory = camuwu.GetComponent<Memory>();
         Refresh();
     }
-    public void OnMouseDown() {
-        current = camuwu.ScreenToWorldPoint(Input.mousePosition);
-        offset = new Vector2(transform.position.x - current.x, transform.position.y - current.y);
-
-        // highlight handler:
-        if (memory.selected == gameObject) {
-            Unclick();
-            memory.selected = null;
+    public override void Refresh() {
+        errorBox.gameObject.SetActive(false);
+        if (!nodesIn[0].isLined || nodesIn[0].connected.data == null) { //needed when the source block has no output given yet
             return;
         }
-        if (memory.selected != null) memory.selected.GetComponent<Memory.IClickable>().Unclick();
-        sr.color = new Color32(255, 200, 255, 255);
-        memory.selected = gameObject;
-    }
 
-    public void OnMouseDrag() {
-        if (!isMoveLocked) {
-            current = camuwu.ScreenToWorldPoint(Input.mousePosition);
-            transform.position = new Vector3(current.x + offset.x, current.y + offset.y, -5);
-        }
-    }
-
-    public void OnMouseUp() {
-        transform.position = new Vector3(transform.position.x, transform.position.y, -1);
-    }
-    public override void Refresh() {
-        if (nodesIn[0].isLined && nodesIn[0].connected.data != null) { //needed when the source block has no output given yet
-            input = nodesIn[0].connected.data;
-            inputType = nodesIn[0].connected.type;
-            newTexture = new Texture2D(input.GetLength(0), input.GetLength(1));
-            cols = new Color[newTexture.width * newTexture.height];
-            switch (input.GetLength(2)) {
-                case 1: 
-                    for (int i = 0; i < newTexture.width; i++) {
-                        for (int j = 0; j < newTexture.height; j++) {
-                            cols[j * newTexture.width + i] = new Color(input[i, j, 0] * inputType[0], input[i, j, 0] * inputType[1], input[i, j, 0] * inputType[2], 1);
-                        }
+        input = nodesIn[0].connected.data;
+        inputType = nodesIn[0].connected.type;
+        newTexture = new Texture2D(input.GetLength(0), input.GetLength(1));
+        textureWidth = newTexture.width;
+        textureHeight = newTexture.height;
+        cols = new Color[textureWidth * textureHeight];
+        switch (input.GetLength(2)) {
+            case 1:
+                for (int i = 0; i < textureWidth; i++)
+                {
+                    for (int j = 1; j <= textureHeight; j++)
+                    {
+                        Debug.Log("j = " + j);
+                        cols[(j - 1) * textureWidth + i] = new Color(input[i, textureHeight - j, 0] * inputType[0], input[i, textureHeight - j, 0] * inputType[1], input[i, textureHeight - j, 0] * inputType[2], 1);
                     }
-                    break;
-                case 2:
-                    for (int i = 0; i < newTexture.width; i++) {
-                        for (int j = 0; j < newTexture.height; j++) {
-                            cols[j * newTexture.width + i] = new Color(input[i, j, 0] * inputType[0], input[i, j, 0] * inputType[1], input[i, j, 0] * inputType[2], input[i, j, 1]);
-                        }
+                }
+                break;
+            case 2:
+                for (int i = 0; i < textureWidth; i++)
+                {
+                    for (int j = 1; j <= textureHeight; j++)
+                    {
+                        cols[(j - 1) * textureWidth + i] = new Color(input[i, textureHeight - j, 0] * inputType[0], input[i, textureHeight - j, 0] * inputType[1], input[i, textureHeight - j, 0] * inputType[2], input[i, textureHeight - j, 1]);
                     }
-                    break;
-                case 3:
-                    for (int i = 0; i < newTexture.width; i++) {
-                        for (int j = 0; j < newTexture.height; j++) {
-                            cols[j * newTexture.width + i] = new Color(input[i, j, 0], input[i, j, 1], input[i, j, 2], 1);
-                        }
+                }
+                break;
+            case 3:
+                for (int i = 0; i < textureWidth; i++)
+                {
+                    for (int j = 1; j <= textureHeight; j++)
+                    {
+                        cols[(j - 1) * textureWidth + i] = new Color(input[i, textureHeight - j, 0], input[i, textureHeight - j, 1], input[i, textureHeight - j, 2], 1);
                     }
-                    break;
-                case 4:
-                    for (int i = 0; i < newTexture.width; i++) {
-                        for (int j = 0; j < newTexture.height; j++) {
-                            cols[j * newTexture.width + i] = new Color(input[i, j, 0], input[i, j, 1], input[i, j, 2], input[i, j, 3]);
-                        }
+                }
+                break;
+            case 4:
+                for (int i = 0; i < textureWidth; i++)
+                {
+                    for (int j = 1; j <= textureHeight; j++)
+                    {
+                        cols[(j - 1) * textureWidth + i] = new Color(input[i, textureHeight - j, 0], input[i, textureHeight - j, 1], input[i, textureHeight - j, 2], input[i, textureHeight - j, 3]);
                     }
-                    break;
-                default: 
-                    Error("too many layers of the image"); 
-                    return;
-            } // switch (input.GetLength(2))
-            newTexture.SetPixels(cols);
-            newTexture.filterMode = FilterMode.Point;
-            newTexture.Apply();
-            imageWindow.GetComponent<SpriteRenderer>().color = Color.white;
-            imageWindow.GetComponent<SpriteRenderer>().sprite = Sprite.Create(newTexture,new Rect(0.0f,0.0f, newTexture.width, newTexture.height),new Vector2(0.5f , 0.5f),100.0f);
-            imageWindow.transform.localScale = new Vector3(90f / (float)newTexture.width, 80f / (float)newTexture.height, 1);
-        }
-    }
-    public void Unclick() {
-        sr.color = Color.white;
-    }
+                }
+                break;
+            default:
+                Error($"{input.GetLength(2)} layers were given.\nOnly 1 to 4 can be displayed");
+                return;
+        } // switch (input.GetLength(2))
+        newTexture.SetPixels(cols);
+        newTexture.filterMode = FilterMode.Point;
+        newTexture.Apply();
+        imageWindow.GetComponent<SpriteRenderer>().color = Color.white;
+        imageWindow.GetComponent<SpriteRenderer>().sprite = Sprite.Create(newTexture,new Rect(0.0f,0.0f, newTexture.width, newTexture.height),new Vector2(0.5f , 0.5f),100.0f);
+        imageWindow.transform.localScale = new Vector3(90f / (float)newTexture.width, 80f / (float)newTexture.height, 1);
+    } // Refresh
 }

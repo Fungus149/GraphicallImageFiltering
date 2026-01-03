@@ -3,69 +3,46 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
-//using UnityEngine.Windows;
+using UnityEngine.Windows;
 
 public class ReadImage : Block, Memory.IClickable {
-    public string path = @"C:\Users\gg149\Downloads\cw.png";
+    public string path = @"Assets\00_Art\SavedImages";
 
-    Camera camuwu;
-    SpriteRenderer sr;
     Texture2D tex;
-    Vector2 offset;
-    Vector2 current;
-    Memory memory;
 
     Color32[] pixels;
     float[,,] output;
 
     int textureWidth;
     int textureHeight;
-
     public void Start() {
         sr = GetComponent<SpriteRenderer>();
         camuwu = Camera.main;
         memory = camuwu.GetComponent<Memory>();
         Refresh();
     }
-    public void OnMouseDown() {
-        current = camuwu.ScreenToWorldPoint(Input.mousePosition);
-        offset = new Vector2(transform.position.x - current.x, transform.position.y - current.y);
-
-        // highlight handler:
-        if (memory.selected == gameObject) {
-            Unclick();
-            memory.selected = null;
+    public override void Refresh() {
+        errorBox.gameObject.SetActive(false);
+        if (path.Contains('\\') && !System.IO.Directory.Exists(path.Substring(0, path.LastIndexOf('\\')))) {
+            Error($"Directory: \\{path.Substring(0, path.LastIndexOf('\\'))} could not be accesed");
             return;
         }
-        if (memory.selected != null) memory.selected.GetComponent<Memory.IClickable>().Unclick();
-        sr.color = new Color32(255, 200, 255, 255);
-        memory.selected = gameObject;
-    }
-    public void OnMouseDrag() {
-        if (!isMoveLocked) {
-            current = camuwu.ScreenToWorldPoint(Input.mousePosition);
-            transform.position = new Vector3(current.x + offset.x, current.y + offset.y, -5);
-        }
-    }
-    public void OnMouseUp() {
-        transform.position = new Vector3(transform.position.x, transform.position.y, -1);
-    }
-    public override void Refresh() {
+
         switch (Path.GetExtension(path)) {
             case ".png":
             case ".jpg":
             case ".jpeg":
-                if (File.Exists(path)) {
+                if (System.IO.File.Exists(path)) {
                     tex = new Texture2D(2, 2);
-                    tex.LoadImage(File.ReadAllBytes(path)); // it rescales automatically
+                    tex.LoadImage(System.IO.File.ReadAllBytes(path)); // it rescales automatically
                 }
                 else {
-                    Error("Incorrect path");
+                    Error($"File: {path} could not be accesed");
                     return;
                 }
                 break;
             default:
-                Error("Unsupportes file type");
+                Error($"Unsupportes file type: {Path.GetExtension(path)}.\nSupported types: .jpeg, .jpg, .png");
                 return;
         }
         pixels = tex.GetPixels32();
@@ -73,8 +50,9 @@ public class ReadImage : Block, Memory.IClickable {
         textureHeight = tex.height;
         output = new float[textureWidth, textureHeight, 4];
         for (int i = 0; i < textureWidth; i++) {
-            for (int j = textureHeight - 1; j >= 0; j--) {
-                Color32 tempCol = pixels[j * textureWidth + i];
+            for (int j = textureHeight -1; j >= 0; j--) {
+                Color32 tempCol = pixels[(textureHeight - j - 1) * textureWidth + i];
+
                 output[i, j, 0] = tempCol.r / 255f;
                 output[i, j, 1] = tempCol.g / 255f;
                 output[i, j, 2] = tempCol.b / 255f;
@@ -86,7 +64,4 @@ public class ReadImage : Block, Memory.IClickable {
             nodesOut[0].connected.GetComponentInParent<Block>().Refresh();
         }
     } // Refresh
-    public void Unclick() {
-        sr.color = Color.white;
-    }
 }

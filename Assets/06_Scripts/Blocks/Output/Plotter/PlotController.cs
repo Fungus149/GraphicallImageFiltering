@@ -26,8 +26,8 @@ public class PlotController : MonoBehaviour {
     private void OnMouseOver() {
         scroll = Input.mouseScrollDelta.y;
         if (scroll != 0) {
-            if (Input.GetKey(KeyCode.LeftShift)) scroll /= 25;
-            plotter.Rescale(scroll);
+            if (Input.GetKey(KeyCode.LeftShift)) scroll /= 10;
+            plotter.Rescale(scroll/2);
         }
     }
     private void OnMouseExit() {
@@ -39,10 +39,10 @@ public class PlotController : MonoBehaviour {
     }
     public void OnMouseDrag() {
         current = camuwu.ScreenToWorldPoint(Input.mousePosition);
-        dotsContainer.transform.position = new Vector3(current.x + offset.x, current.y + offset.y, -2f);
+        dotsContainer.transform.position = new Vector3(current.x + offset.x, current.y + offset.y, dotsContainer.transform.position.z);
         plotter.plotOffset = new Vector2(dotsContainer.transform.position.x - transform.position.x, dotsContainer.transform.position.y - transform.position.y);
-        asymptotesContainer.transform.position = new Vector3(current.x + offset.x, asymptotesContainer.transform.position.y, -2f);
-        xAxis.transform.position = new Vector3(xAxis.transform.position.x, current.y + offset.y, -1.2f);
+        asymptotesContainer.transform.position = new Vector3(current.x + offset.x, asymptotesContainer.transform.position.y, asymptotesContainer.transform.position.z);
+        xAxis.transform.position = new Vector3(xAxis.transform.position.x, current.y + offset.y, xAxis.transform.position.z);
 
         plotter.Trim();
     }

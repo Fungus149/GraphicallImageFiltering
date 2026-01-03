@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class NumBEntryThr : MonoBehaviour {
     Threshold thr;
+    float temp;
     private void Start() {
         thr = GetComponentInParent<Threshold>();
     }
     public void GrabValueFromEntry(string entry) {
-        Debug.Log(entry);
-        thr.numB = float.Parse(entry);
+        if (!float.TryParse(entry, out temp)) {
+            thr.Error("Min can be a float only!");
+            return;
+        }
+        thr.numB = temp;
         thr.Refresh();
     }
 }
